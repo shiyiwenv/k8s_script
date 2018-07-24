@@ -1,1 +1,2 @@
-# k8s_script
+# kubernetes 一些部署脚本
+
