@@ -25,7 +25,7 @@ sleep 2
 
 h1 $" System checking "
 h2 $"    check google network registry k8s.gcr.io"
-    curl --connect-timeout 3 -m 10 k8s.gcr.io
+    curl -s --connect-timeout 3 -m 10 k8s.gcr.io > /dev/null
 ret
 h2 $"    It is Centos7.x ?"
      [[ "`cat /etc/redhat-release|sed -r 's/.* ([0-9]+)\..*/\1/'`" == "7" ]] && success $"OK!" || error $"Error please check system version"
