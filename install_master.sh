@@ -34,7 +34,7 @@ h2 $"  Firewalld and iptables stop  "
       systemctl status firewalld
       [[ $? -eq 0 ]] && error $"please stop firewalld" || success $"OK!"
       echo "checking iptables"
-      systemctl stop iptables
+      systemctl status iptables
       [[ $? -eq 0 ]] && error $"please stop iptables" || success $"OK!"
 echo -n "Do you want to continue [Y/N]?"
 read  answer
