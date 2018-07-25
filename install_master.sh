@@ -31,10 +31,10 @@ h2 $"    It is Centos7.x ?"
      [[ "`cat /etc/redhat-release|sed -r 's/.* ([0-9]+)\..*/\1/'`" == "7" ]] && success $"OK!" || error $"Error please check system version"
 h2 $"  Firewalld and iptables stop  "
       echo "checking firewalld"
-      systemctl status firewalld
+      systemctl status firewalld > /dev/null
       [[ $? -eq 0 ]] && error $"please stop firewalld" || success $"OK!"
       echo "checking iptables"
-      systemctl status iptables
+      systemctl status iptables > /dev/null
       [[ $? -eq 0 ]] && error $"please stop iptables" || success $"OK!"
 echo -n "Do you want to continue [Y/N]?"
 read  answer
