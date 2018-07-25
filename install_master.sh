@@ -24,7 +24,7 @@ printf '\n'$(tput setaf 1; tput setab 0; tput bold)'此脚本应用于系统安�
 sleep 2
 
 h1 $" System checking "
-h2 $"    pull google registry k8s.gcr.io"
+h2 $"    check google network registry k8s.gcr.io"
     curl --connect-timeout 3 -m 10 k8s.gcr.io
 ret
 h2 $"    It is Centos7.x ?"
