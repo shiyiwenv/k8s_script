@@ -32,10 +32,10 @@ h2 $"    It is Centos7.x ?"
 h2 $"  Firewalld and iptables stop  "
       echo "checking firewalld"
       systemctl status firewalld
-      ret
+      [[ $? -eq 0 ]] && error $"please stop firewalld" || success $"OK!"
       echo "checking iptables"
       systemctl stop iptables
-      ret
+      [[ $? -eq 0 ]] && error $"please stop iptables" || success $"OK!"
 echo -n "Do you want to continue [Y/N]?"
 read  answer
 [[ "$answer" == "y" || "$answer" == "Y" ]] && h1 $"Starting install..." || error $"Exit"
