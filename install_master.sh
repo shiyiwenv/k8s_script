@@ -3,7 +3,7 @@
 #init kubernetes master server
 h1() { printf "$(tput bold)%s...\n$(tput sgr0)" "$@" 
 }
-h2() { ntf "$(tput setaf 3)%s\n$(tput sgr0)" "$@"
+h2() { printf "$(tput setaf 3)%s\n$(tput sgr0)" "$@"
 }
 
 success() { printf "$(tput setaf 2; tput bold)✔ %s \n$(tput sgr0)" "$@"
