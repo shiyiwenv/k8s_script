@@ -114,6 +114,18 @@ modprobe nf_conntrack_ipv4
 modprobe ip_vs
 ret
 
+h1 $"  Seting start server configured"
+cat <<EOF >> /etc/rc.local
+swapoff -a
+modprobe ip_vs_rr
+modprobe ip_vs_wrr
+modprobe ip_vs_sh
+modprobe nf_conntrack_ipv4
+modprobe ip_vs
+EOF
+chmod +x /etc/rc.local
+chmod +x /etc/rc.d/rc.local
+
 h1 $" install kubelet、kubeadm、kubectl "
 yum install -y kubelet kubeadm kubectl > /dev/null
 ret
