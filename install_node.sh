@@ -1,7 +1,4 @@
 #!/bin/sh
-
-h1() { printf "$(tput bold)%s\n" "$@" 
-}#!/bin/sh
 #Author: shiyiwen
 #init kubernetes master server
 h1() { printf "$(tput bold)%s...\n$(tput sgr0)" "$@" 
@@ -45,6 +42,7 @@ h2 $"  Firewalld and iptables stop  "
       [[ $? -eq 0 ]] && error $"please stop firewalld" || success $"OK!"
 echo -n "Do you want to continue [Y/N]?"
 read  answer
+[[ "$answer" == "y" || "$answer" == "Y" ]] && h1 $"Starting install..." || error $"Exit"
 
 h1 $" iptables setting ,Please insert then following /etc/sysconfig/iptables ,and systemctl restart iptables"
     echo "-A INPUT -s 10.10.0.0/16 -j ACCEPT
