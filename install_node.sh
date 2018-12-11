@@ -126,6 +126,11 @@ KillMode=process
 [Install]
 WantedBy=multi-user.target
 EOF
+ret
+
+h1 $" change docker log-driver=json-file"
+sed -i 's/journald/json-file/g' /etc/sysconfig/docker
+ret
 
 h1 $" install kubelet、kubeadm、kubectl "
 yum install -y kubelet-1.11.1 kubeadm-1.11.1 kubectl-1.11.1 > /dev/null
