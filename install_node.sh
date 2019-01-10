@@ -156,7 +156,7 @@ ret
 h2 $" start docker and kubelet"
 systemctl daemon-reload
 
-systemctl enable docker && systemctl start docker > /dev/null
+systemctl enable docker > /dev/null && systemctl start docker > /dev/null
 ret
-#systemctl restart kubelet
-#ret
+systemctl enable kubelet > /dev/null
+ret
