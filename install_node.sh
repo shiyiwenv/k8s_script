@@ -1,6 +1,6 @@
 #!/bin/sh
-#Author: shiyiwen
-#init kubernetes master server
+#Author: 907765003@qq.com
+#init kubernetes node server
 h1() { printf "$(tput bold)%s...\n$(tput sgr0)" "$@" 
 }
 h2() { printf "$(tput setaf 3)%s\n$(tput sgr0)" "$@"
@@ -44,11 +44,11 @@ echo -n "Do you want to continue [Y/N]?"
 read  answer
 [[ "$answer" == "y" || "$answer" == "Y" ]] && h1 $"Starting install..." || error $"Exit"
 
-h1 $" iptables setting ,Please insert then following /etc/sysconfig/iptables ,and systemctl restart iptables"
+h2 $" iptables setting ,Please insert then following /etc/sysconfig/iptables ,and systemctl restart iptables"
     echo "-A INPUT -s 10.10.0.0/16 -j ACCEPT
           -A FORWARD -s 10.0.0.0/8 -j ACCEPT"
 
-h1 $"  Change kubernetes repo"
+h2 $"  Change kubernetes repo"
 
 cat <<EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -59,27 +59,36 @@ gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
+
+h2 $"  Init System......"
 setenforce 0
 swapoff -a
+cat > /etc/sysconfig/modules/ipvs.modules <<EOF
+#!/bin/bash
+ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack_ipv4"
+for kernel_module in \${ipvs_modules}; do
+    /sbin/modinfo -F filename \${kernel_module} > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        /sbin/modprobe \${kernel_module}
+    fi
+done
+EOF
+chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules
+
 cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system > /dev/null
 
-h1 $"  Seting start server configured"
+h2 $"  Setting start server configured"
 cat <<EOF >> /etc/rc.local
 swapoff -a
-modprobe ip_vs_rr
-modprobe ip_vs_wrr
-modprobe ip_vs_sh
-modprobe nf_conntrack_ipv4
-modprobe ip_vs
 EOF
 chmod +x /etc/rc.local
 chmod +x /etc/rc.d/rc.local
 
-h1 $"  install docker and change docker strong dir"
+h2 $"  install docker and change docker strong dir"
 mkdir -p /data/docker
 yum install -y docker > /dev/null
 cat <<EOF > /usr/lib/systemd/system/docker.service
@@ -128,23 +137,23 @@ WantedBy=multi-user.target
 EOF
 ret
 
-h1 $" change docker log-driver=json-file"
+h2 $" change docker log-driver=json-file"
 sed -i 's/journald/json-file/g' /etc/sysconfig/docker
 ret
 
-h1 $" install kubelet、kubeadm、kubectl "
+h2 $" install kubelet、kubeadm、kubectl "
 yum install -y kubelet-1.11.1 kubeadm-1.11.1 kubectl-1.11.1 > /dev/null
 ret
 
-h1 $" install epel "
+h2 $" install epel "
 yum install -y epel-release > /dev/null
 ret
 
-h1 $" install nfs glusterfs client "
+h2 $" install nfs glusterfs client "
 yum install -y glusterfs glusterfs-fuse nfs-utils > /dev/null
 ret
 
-h1 $" start docker and kubelet"
+h2 $" start docker and kubelet"
 systemctl daemon-reload
 
 systemctl enable docker && systemctl start docker > /dev/null
