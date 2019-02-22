@@ -60,12 +60,18 @@ repo_gpgcheck=1
 gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 
-h2 $"  Init System......"
+h2 $"  Init IPVS modules......"
 setenforce 0
 swapoff -a
+cat <<EOF >  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+sysctl --system > /dev/null
+
 cat > /etc/sysconfig/modules/ipvs.modules <<EOF
 #!/bin/bash
-ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack_ipv4"
+ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack_ipv4"
 for kernel_module in \${ipvs_modules}; do
     /sbin/modinfo -F filename \${kernel_module} > /dev/null 2>&1
     if [ $? -eq 0 ]; then
@@ -73,13 +79,17 @@ for kernel_module in \${ipvs_modules}; do
     fi
 done
 EOF
-chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipvs.modules
+chmod 755 /etc/sysconfig/modules/ipvs.modules && /bin/bash /etc/sysconfig/modules/ipvs.modules
+ret
 
-cat <<EOF >  /etc/sysctl.d/k8s.conf
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-EOF
-sysctl --system > /dev/null
+h2 $"  Checking DNS configured"
+dnssum=`cat /etc/resolv.conf |egrep -v "^#" |grep nameserver|wc -l`
+
+if [[ $dnssum -gt 3 ]];then
+    dns=`cat /etc/resolv.conf |egrep -v "^#" |grep nameserver|awk 'NR <=3 {print $0}'`
+    echo "$dns" > /etc/resolv.conf
+fi
+ret
 
 h2 $"  Setting start server configured"
 cat <<EOF >> /etc/rc.local
@@ -90,7 +100,7 @@ chmod +x /etc/rc.d/rc.local
 
 h2 $"  install docker and change docker strong dir"
 mkdir -p /data/docker
-yum install -y docker > /dev/null
+yum install -y -q docker > /dev/null
 cat <<EOF > /usr/lib/systemd/system/docker.service
 [Unit]
 Description=Docker Application Container Engine
@@ -142,7 +152,7 @@ sed -i 's/journald/json-file/g' /etc/sysconfig/docker
 ret
 
 h2 $" install kubelet、kubeadm、kubectl "
-yum install -y kubelet-1.11.1 kubeadm-1.11.1 kubectl-1.11.1 > /dev/null
+yum install -y -q kubelet-1.11.1 kubeadm-1.11.1 kubectl-1.11.1 > /dev/null 2>&1
 ret
 
 h2 $" install epel "
@@ -150,13 +160,17 @@ yum install -y epel-release > /dev/null
 ret
 
 h2 $" install nfs glusterfs client "
-yum install -y glusterfs glusterfs-fuse nfs-utils > /dev/null
+yum install -y glusterfs glusterfs-fuse nfs-utils --disablerepo=kubernetes> /dev/null
 ret
 
 h2 $" start docker and kubelet"
+sed -i 's/EXTRA_ARGS$/EXTRA_ARGS --runtime-cgroups=\/systemd\/system.slice --kubelet-cgroups=\/systemd\/system.slice/g' \
+/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+ret
 systemctl daemon-reload
 
-systemctl enable docker > /dev/null && systemctl start docker > /dev/null
+systemctl enable docker -q && systemctl start docker > /dev/null
 ret
-systemctl enable kubelet > /dev/null
+systemctl enable kubelet -q
+/bin/bash /etc/sysconfig/modules/ipvs.modules
 ret
