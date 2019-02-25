@@ -14,5 +14,6 @@ Problem feedback : 907765003@qq.com
 lvs/lvs_realserver_init.sh
 
 Usage: sh lvs_realserver_init.sh start vip subnum
-	   sh lvs_realserver_init.sh start 175.25.16.1 0
-	   sh lvs_realserver_init.sh start 175.25.16.2 1
+
+sh lvs_realserver_init.sh start 175.25.16.1 0
+sh lvs_realserver_init.sh start 175.25.16.2 1
