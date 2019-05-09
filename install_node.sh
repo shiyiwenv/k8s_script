@@ -160,7 +160,7 @@ yum install -y epel-release > /dev/null
 ret
 
 h2 $" install nfs glusterfs client "
-yum install -y glusterfs glusterfs-fuse nfs-utils --disablerepo=kubernetes> /dev/null
+yum install -y glusterfs glusterfs-fuse nfs-utils --disablerepo=epel> /dev/null
 ret
 
 h2 $" start docker and kubelet"
