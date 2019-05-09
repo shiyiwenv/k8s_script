@@ -152,7 +152,7 @@ sed -i 's/journald/json-file/g' /etc/sysconfig/docker
 ret
 
 h2 $" install kubelet、kubeadm、kubectl "
-yum install -y -q kubelet-1.11.1 kubeadm-1.11.1 kubectl-1.11.1 > /dev/null 2>&1
+yum install -y -q kubelet-1.11.1 kubeadm-1.11.1 kubectl-1.11.1 kubernetes-cni-0.6.0> /dev/null 2>&1
 ret
 
 h2 $" install epel "
